@@ -1,0 +1,27 @@
+---
+
+- name: Install Python tools
+  yum: name=python-setuptools state=latest
+
+- name: Install Supervisord
+  command: easy_install {{item}}
+  with_items: 
+    - supervisor
+    - superlance
+
+- name: Create additional settings directory structure
+  file: path={{item}} state=directory
+  with_items: 
+    - /etc/supervisor/conf.d
+    - /var/log/supervisor    
+
+- name: Create setting file
+  copy: src=config dest=/etc/supervisor/supervisord.conf
+
+- file: src=/etc/supervisor/supervisord.conf  dest=/etc/supervisord.conf state=link
+
+- name: Create systemd service file
+  copy: src=supervisord.service dest=/etc/systemd/system/supervisord.service
+
+- name: Start Supervisord
+  service: name=supervisord state=started enabled=yes
